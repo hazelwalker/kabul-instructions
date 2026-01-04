@@ -33,7 +33,7 @@ Das Python-Skript generiert professionelle PDF-Dateien mit:
 | `main.py` | **Haupt-Skript** – generiert alle PDFs |
 | `kabul_cards_4card_edition.pdf` | 4 Regelkarten + KABUL-Rückseiten |
 | `kabul_cards_2card_edition.pdf` | 2 Kompaktkarten (beidseitig bedruckt) |
-| `kabul_cards_title.pdf` | Titelkarte (rotes Design mit "Spielregeln") |
+| `kabul_cards_title.pdf` | Titelkarte (Vorderseite: Logo, Rückseite: QR-Code + Beschreibung) |
 
 ---
 
@@ -74,6 +74,15 @@ Das Python-Skript generiert professionelle PDF-Dateien mit:
 ---
 
 ## Anpassungen
+
+### Sprache ändern
+```python
+# In main.py, Zeile ~35
+LANGUAGE = "de"  # Deutsch
+LANGUAGE = "en"  # English
+```
+Output-Dateien werden automatisch mit Sprachsuffix benannt:
+- `kabul_cards_4card_de.pdf` / `kabul_cards_4card_en.pdf`
 
 ### Content ändern
 ```python
@@ -144,3 +153,5 @@ c.circle(x + 50*mm, y + 20*mm, 12*mm, ...)  # x, y, radius
 | 2025-01-04 | Content aus händisch korrigierter PDF übernommen |
 | 2025-01-04 | Windows-Kompatibilität (Arial-Fonts) hinzugefügt |
 | 2025-01-04 | Titelkarte hinzugefügt (rotes Design mit "Spielregeln") |
+| 2025-01-04 | Titelkarten-Rückseite: QR-Code + Spielbeschreibung |
+| 2025-01-04 | Zweisprachige Unterstützung (DE/EN) mit LANGUAGE-Variable |

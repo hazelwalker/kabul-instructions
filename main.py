@@ -37,7 +37,10 @@ import sys
 # CONFIGURATION - Edit these values to customize output
 # =============================================================================
 
-OUTPUT_DIR = "."  # Current directory (change as needed)
+# Language selection: "de" (German) or "en" (English)
+LANGUAGE = "de"
+
+OUTPUT_DIR = "./cards"  # Current directory (change as needed)
 
 # Card dimensions (Poker standard: 63x88mm)
 CARD_WIDTH = 63 * mm
@@ -119,172 +122,351 @@ class Fonts:
 
 
 # =============================================================================
-# CARD CONTENT - Single source of truth for all card text
+# CARD CONTENT - Bilingual (German / English)
 # =============================================================================
 #
 # Edit the content below to update BOTH PDF editions automatically.
-#
-# Structure:
-#   - CARD_1: Kartenwerte & Aktionen
-#   - CARD_2: Spielablauf
-#   - CARD_3: Detailregeln
-#   - CARD_4: Strafen & Regeln
+# Change LANGUAGE at the top to switch between "de" and "en".
 #
 # =============================================================================
 
-# --- CARD 1: Kartenwerte & Aktionen ---
-CARD_1_VALUES = [
-    # Format: (label, value, action_or_None, has_red_symbols)
-    # The "=" signs will be automatically aligned in the output
-    ("Joker", "-1 Punkte", None, False),
-    ("Ass", "1 Punkt", None, False),
-    ("2–6", "Kartenwert", None, False),
-    ("7, 8", "Kartenwert", "Eigene ansehen", False),
-    ("9, 10", "Kartenwert", "Fremde ansehen", False),
-    ("Bube, Dame", "10 Punkte", "Tauschen", False),
-    ("König ♠♣", "10 Punkte", "2× Ansehen & Tauschen?", False),
-    ("König ♥♦", "0 Punkte", None, True),  # has_red_symbols=True for red ♥♦
-]
-
-CARD_1 = {
-    "title": "Kartenwerte & Aktionen",
-    "type": "values_table",
-    "values": CARD_1_VALUES,
-    "footer_sections": [
-        {"heading": "Ziel", "content": "Niedrigste Gesamtpunktzahl"},
-        {"heading": "Ende", "content": "Erster Spieler > 100 Punkte"},
-    ]
-}
-
-# --- CARD 2: Spielablauf ---
-CARD_2 = {
-    "title": "Spielablauf",
-    "type": "sections",
-    "sections": [
-        {
-            "heading": "Setup",
-            "content": [
-                "4 Karten verdeckt im Quadrat",
-                "Untere 2 Karten einmal ansehen",
-                "Erste Karte vom Stapel aufdecken"
+CONTENT = {
+    # =========================================================================
+    # GERMAN CONTENT
+    # =========================================================================
+    "de": {
+        "card_1_values": [
+            ("Joker", "-1 Punkt", None, False),
+            ("Ass", "1 Punkt", None, False),
+            ("2–6", "Kartenwert", None, False),
+            ("7, 8", "Kartenwert", "Eigene ansehen", False),
+            ("9, 10", "Kartenwert", "Fremde ansehen", False),
+            ("Bube, Dame", "10 Punkte", "Tauschen", False),
+            ("König ♠♣", "10 Punkte", "2× Ansehen & Tauschen?", False),
+            ("König ♥♦", "0 Punkte", None, True),
+        ],
+        "card_1": {
+            "title": "Kartenwerte & Aktionen",
+            "type": "values_table",
+            "footer_sections": [
+                {"heading": "Ziel", "content": "Niedrigste Gesamtpunktzahl"},
+                {"heading": "Ende", "content": "Erster Spieler > 100 Punkte"},
             ]
         },
-        {
-            "heading": "Spielzug",
-            "content": [
-                "1. Karte ziehen von Stapel o. Ablage",
-                "2. Wählen: Ablegen, Ersetzen",
-                "   oder Kartenaktion ausführen"
+        "card_2": {
+            "title": "Spielablauf",
+            "type": "sections",
+            "sections": [
+                {
+                    "heading": "Setup",
+                    "content": [
+                        "4 Karten verdeckt im Quadrat",
+                        "Untere 2 Karten einmal ansehen",
+                        "Erste Karte vom Stapel aufdecken"
+                    ]
+                },
+                {
+                    "heading": "Spielzug",
+                    "content": [
+                        "1. Karte ziehen von Stapel o. Ablage",
+                        "2. Wählen: Ablegen, Ersetzen",
+                        "   oder Kartenaktion ausführen"
+                    ]
+                },
+                {
+                    "heading": "Abwerfen",
+                    "content": [
+                        "Gleiche Karte wie auf der Ablage?",
+                        "→ Eigene/fremde Karte draufschmeißen!",
+                        "Schnellster gewinnt · 1× pro Abwerfen"
+                    ]
+                },
+                {
+                    "heading": "Kabul",
+                    "content": [
+                        "Bei ≤4 Punkten: Kabul rufen",
+                        "→ Löst letzte Runde aus"
+                    ]
+                }
             ]
         },
-        {
-            "heading": "Abwerfen",
-            "content": [
-                "Gleiche Karte wie auf der Ablage?",
-                "→ Eigene/fremde Karte draufschmeißen!",
-                "Schnellster gewinnt · 1× pro Abwerfen"
+        "card_3": {
+            "title": "Detailregeln",
+            "type": "sections",
+            "sections": [
+                {
+                    "heading": "Abwerfen-Details",
+                    "content": [
+                        "Auch fremde Karten abwerfbar",
+                        "Eigene Karte als Ersatz geben",
+                        "Schnellster gewinnt",
+                        "Berührt Ablage = gültig",
+                        "Zählt nicht als Spielzug"
+                    ]
+                },
+                {
+                    "heading": "Karte ersetzen",
+                    "content": [
+                        "Sofort umdrehen & zeigen",
+                        "Nicht erst anschauen!"
+                    ]
+                },
+                {
+                    "heading": "Sonderfälle",
+                    "content": [
+                        "Stapel leer → Ablage mischen",
+                        "Keine Karten mehr → Kabul (Pflicht)"
+                    ]
+                }
             ]
         },
-        {
-            "heading": "Kabul",
-            "content": [
-                "Bei ≤4 Punkten: Kabul rufen",
-                "→ Löst letzte Runde aus"
+        "card_4": {
+            "title": "Strafen & Regeln",
+            "type": "sections",
+            "sections": [
+                {
+                    "heading": "Strafen (+1 Karte)",
+                    "content": [
+                        "Setup: Karten 2× angesehen",
+                        "Falsches Abwerfen"
+                    ]
+                },
+                {
+                    "heading": "Kabul-Strafe",
+                    "content": [
+                        "Nicht niedrigste Anzahl oder >4 Punkte?",
+                        "→ Kartenzahl verdoppelt",
+                        "oder",
+                        "→ Nächste Runde: 5 Karten"
+                    ]
+                },
+                {
+                    "heading": "Wichtig",
+                    "content": [
+                        "Kabul erst ab ≤4 Punkte rufbar",
+                        "Am Ende: Bestätigung nötig",
+                        "Nach Abwerfen: Eigener Zug möglich",
+                        "Kartenaktion = Ablegen + Aktion"
+                    ]
+                },
+                {
+                    "heading": "Gleichstand",
+                    "content": ["Der, der Kabul gerufen hat gewinnt"]
+                }
             ]
+        },
+        "back_title": "KABUL",
+        "back_subtitle": "Kartenspiel",
+        "title_card_title": "KABUL",
+        "title_card_subtitle": "Spielregeln",
+        "github_url": "https://github.com/hazelwalker/kabul-instructions",
+        "game_description": [
+            "KABUL ist ein schnelles Kartenspiel für 2-6 Spieler,",
+            "inspiriert von Cabo, Skyjo oder Golf. Ziel ist es, die",
+            "niedrigste Punktzahl zu erreichen – aber Vorsicht:",
+            "Du kennst nicht alle deine Karten!",
+            "",
+            "Merke dir deine Karten, tausche clever und rufe",
+            "»Kabul!«, wenn du glaubst zu gewinnen.",
+            "",
+            "Spieldauer: ca. 15-20 Minuten",
+        ],
+        "about_title": "Über das Spiel",
+        "page_info": {
+            "4card_front": "Vorderseiten",
+            "4card_back": "Rückseiten",
+            "4card_edition": "Regelkarten",
+            "2card_front": "Vorderseiten: Kartenwerte | Detailregeln",
+            "2card_back": "Rückseiten: Spielablauf | Strafen",
+            "2card_edition": "Kompakt",
+            "title_front": "Vorderseite",
+            "title_back": "Rückseite",
+            "duplex_hint": "↻ Duplex: Lange Kante spiegeln",
         }
-    ]
-}
+    },
 
-# --- CARD 3: Detailregeln ---
-CARD_3 = {
-    "title": "Detailregeln",
-    "type": "sections",
-    "sections": [
-        {
-            "heading": "Abwerfen-Details",
-            "content": [
-                "Auch fremde Karten abwerfbar",
-                "Eigene Karte als Ersatz geben",
-                "Schnellster gewinnt",
-                "Berührt Ablage = gültig",
-                "Zählt nicht als Spielzug"
+    # =========================================================================
+    # ENGLISH CONTENT
+    # =========================================================================
+    "en": {
+        "card_1_values": [
+            ("Joker", "-1 Point", None, False),
+            ("Ace", "1 Point", None, False),
+            ("2–6", "Face Value", None, False),
+            ("7, 8", "Face Value", "View own card", False),
+            ("9, 10", "Face Value", "View other's card", False),
+            ("Jack, Queen", "10 Points", "Swap cards", False),
+            ("King ♠♣", "10 Points", "2× View & Swap?", False),
+            ("King ♥♦", "0 Points", None, True),
+        ],
+        "card_1": {
+            "title": "Card Values & Actions",
+            "type": "values_table",
+            "footer_sections": [
+                {"heading": "Goal", "content": "Lowest total score"},
+                {"heading": "End", "content": "First player > 100 points"},
             ]
         },
-        {
-            "heading": "Karte ersetzen",
-            "content": [
-                "Sofort umdrehen & zeigen",
-                "Nicht erst anschauen!"
+        "card_2": {
+            "title": "Gameplay",
+            "type": "sections",
+            "sections": [
+                {
+                    "heading": "Setup",
+                    "content": [
+                        "4 cards face-down in a square",
+                        "Look at bottom 2 cards once",
+                        "Flip first card from draw pile"
+                    ]
+                },
+                {
+                    "heading": "Turn",
+                    "content": [
+                        "1. Draw card from pile or discard",
+                        "2. Choose: Discard, Replace",
+                        "   or use card action"
+                    ]
+                },
+                {
+                    "heading": "Smash",
+                    "content": [
+                        "Same card as on discard pile?",
+                        "→ Smash your/other's card on top!",
+                        "Fastest wins · 1× per smash"
+                    ]
+                },
+                {
+                    "heading": "Kabul",
+                    "content": [
+                        "At ≤4 points: Call Kabul",
+                        "→ Triggers final round"
+                    ]
+                }
             ]
         },
-        {
-            "heading": "Sonderfälle",
-            "content": [
-                "Stapel leer → Ablage mischen",
-                "Keine Karten mehr → Kabul (Pflicht)"
+        "card_3": {
+            "title": "Detailed Rules",
+            "type": "sections",
+            "sections": [
+                {
+                    "heading": "Smash Details",
+                    "content": [
+                        "Can smash other players' cards too",
+                        "Give own card as replacement",
+                        "Fastest player wins",
+                        "Touching discard = valid",
+                        "Does not count as turn"
+                    ]
+                },
+                {
+                    "heading": "Replace Card",
+                    "content": [
+                        "Flip immediately & show",
+                        "Don't peek first!"
+                    ]
+                },
+                {
+                    "heading": "Special Cases",
+                    "content": [
+                        "Draw pile empty → Shuffle discard",
+                        "No cards left → Kabul (mandatory)"
+                    ]
+                }
             ]
+        },
+        "card_4": {
+            "title": "Penalties & Rules",
+            "type": "sections",
+            "sections": [
+                {
+                    "heading": "Penalties (+1 Card)",
+                    "content": [
+                        "Setup: Looked at cards twice",
+                        "Wrong smash"
+                    ]
+                },
+                {
+                    "heading": "Kabul Penalty",
+                    "content": [
+                        "Not lowest or >4 points?",
+                        "→ Double your card count",
+                        "or",
+                        "→ Next round: 5 cards"
+                    ]
+                },
+                {
+                    "heading": "Important",
+                    "content": [
+                        "Kabul only callable at ≤4 points",
+                        "End: Confirmation required",
+                        "After smash: Own turn possible",
+                        "Card action = Discard + Action"
+                    ]
+                },
+                {
+                    "heading": "Tie",
+                    "content": ["Kabul caller wins"]
+                }
+            ]
+        },
+        "back_title": "KABUL",
+        "back_subtitle": "Card Game",
+        "title_card_title": "KABUL",
+        "title_card_subtitle": "Game Rules",
+        "github_url": "https://github.com/hazelwalker/kabul-instructions",
+        "game_description": [
+            "KABUL is a fast-paced card game for 2-6 players,",
+            "inspired by Cabo, Skyjo and Golf. The goal is to achieve",
+            "the lowest score – but beware:",
+            "You don't know all your cards!",
+            "",
+            "Memorize your cards, swap cleverly, and call",
+            "»Kabul!« when you think you'll win.",
+            "",
+            "Duration: approx. 15-20 minutes",
+        ],
+        "about_title": "About the Game",
+        "page_info": {
+            "4card_front": "Front Sides",
+            "4card_back": "Back Sides",
+            "4card_edition": "Rule Cards",
+            "2card_front": "Front: Card Values | Detailed Rules",
+            "2card_back": "Back: Gameplay | Penalties",
+            "2card_edition": "Compact",
+            "title_front": "Front Side",
+            "title_back": "Back Side",
+            "duplex_hint": "↻ Duplex: Long Edge Flip",
         }
-    ]
+    }
 }
 
-# --- CARD 4: Strafen & Regeln ---
-CARD_4 = {
-    "title": "Strafen & Regeln",
-    "type": "sections",
-    "sections": [
-        {
-            "heading": "Strafen (+1 Karte)",
-            "content": [
-                "Setup: Karten 2× angesehen",
-                "Falsches Abwerfen"
-            ]
-        },
-        {
-            "heading": "Kabul-Strafe",
-            "content": [
-                "Nicht niedrigste oder >4 Punkte?",
-                "→ Kartenzahl verdoppelt",
-                "oder",
-                "→ Nächste Runde: 5 Karten"
-            ]
-        },
-        {
-            "heading": "Wichtig",
-            "content": [
-                "Kabul erst ab ≤4 Punkte rufbar",
-                "Am Ende: Bestätigung nötig",
-                "Nach Abwerfen: Eigener Zug möglich",
-                "Kartenaktion = Ablegen + Aktion"
-            ]
-        },
-        {
-            "heading": "Gleichstand",
-            "content": ["Der der Kabul gerufen hat gewinnt"]
-        }
-    ]
-}
 
-# Back side text (4-card edition only)
-BACK_TITLE = "KABUL"
-BACK_SUBTITLE = "Kartenspiel"
+# =============================================================================
+# ACTIVE CONTENT (loaded based on LANGUAGE setting)
+# =============================================================================
 
-# Title card text
-TITLE_CARD_TITLE = "KABUL"
-TITLE_CARD_SUBTITLE = "Spielregeln"
+def get_content():
+    """Get content for the selected language."""
+    lang = CONTENT[LANGUAGE]
 
-# Title card back side content
-GITHUB_URL = "https://github.com/hazelwalker/kabul-instructions"
-GAME_DESCRIPTION = [
-    "KABUL ist ein schnelles Kartenspiel für 2-6 Spieler,",
-    "inspiriert von Cabo, Skyjo oder Golf. Ziel ist es, die",
-    "niedrigste Punktzahl zu erreichen – aber Vorsicht:",
-    "Du kennst nicht alle deine Karten!",
-    "",
-    "Merke dir deine Karten, tausche clever und rufe",
-    "»Kabul!«, wenn du glaubst zu gewinnen.",
-    "",
-    "Spieldauer: ca. 15–20 Minuten",
-]
+    # Build CARD_1 with values
+    card_1 = lang["card_1"].copy()
+    card_1["values"] = lang["card_1_values"]
+
+    return {
+        "CARD_1": card_1,
+        "CARD_2": lang["card_2"],
+        "CARD_3": lang["card_3"],
+        "CARD_4": lang["card_4"],
+        "BACK_TITLE": lang["back_title"],
+        "BACK_SUBTITLE": lang["back_subtitle"],
+        "TITLE_CARD_TITLE": lang["title_card_title"],
+        "TITLE_CARD_SUBTITLE": lang["title_card_subtitle"],
+        "GITHUB_URL": lang["github_url"],
+        "GAME_DESCRIPTION": lang["game_description"],
+        "ABOUT_TITLE": lang["about_title"],
+        "PAGE_INFO": lang["page_info"],
+    }
 
 
 # =============================================================================
@@ -466,7 +648,7 @@ def draw_front_background(c, x, y):
     c.rect(draw_x, y + CARD_HEIGHT - 3.5*mm, draw_width, 3.5*mm + BLEED, fill=1, stroke=0)
 
 
-def draw_back_background(c, x, y):
+def draw_back_background(c, x, y, content):
     """
     Draw the decorative back side (4-card edition only).
 
@@ -514,13 +696,13 @@ def draw_back_background(c, x, y):
     # KABUL text
     c.setFillColor(Colors.bg)
     c.setFont(Fonts.title, 18)
-    c.drawCentredString(x + CARD_WIDTH/2, y + CARD_HEIGHT/2 + 5*mm, BACK_TITLE)
+    c.drawCentredString(x + CARD_WIDTH/2, y + CARD_HEIGHT/2 + 5*mm, content["BACK_TITLE"])
 
     c.setFont(Fonts.body, 8)
-    c.drawCentredString(x + CARD_WIDTH/2, y + CARD_HEIGHT/2 - 5*mm, BACK_SUBTITLE)
+    c.drawCentredString(x + CARD_WIDTH/2, y + CARD_HEIGHT/2 - 5*mm, content["BACK_SUBTITLE"])
 
 
-def draw_title_card_background(c, x, y):
+def draw_title_card_background(c, x, y, content):
     """
     Draw the title card (same design as back, but with "Spielregeln" subtitle).
 
@@ -568,27 +750,27 @@ def draw_title_card_background(c, x, y):
     # KABUL title (larger)
     c.setFillColor(Colors.bg)
     c.setFont(Fonts.title, 20)
-    c.drawCentredString(x + CARD_WIDTH/2, y + CARD_HEIGHT/2 + 8*mm, TITLE_CARD_TITLE)
+    c.drawCentredString(x + CARD_WIDTH/2, y + CARD_HEIGHT/2 + 8*mm, content["TITLE_CARD_TITLE"])
 
     # "Spielregeln" subtitle
     c.setFont(Fonts.body, 9)
-    c.drawCentredString(x + CARD_WIDTH/2, y + CARD_HEIGHT/2 - 4*mm, TITLE_CARD_SUBTITLE)
+    c.drawCentredString(x + CARD_WIDTH/2, y + CARD_HEIGHT/2 - 4*mm, content["TITLE_CARD_SUBTITLE"])
 
 
-def draw_title_card(c, x, y):
+def draw_title_card(c, x, y, content):
     """Draw the title card with clipping and crop marks."""
     c.saveState()
     clip_path = c.beginPath()
     clip_path.rect(x - BLEED, y - BLEED, CARD_WIDTH_BLEED, CARD_HEIGHT_BLEED)
     c.clipPath(clip_path, stroke=0, fill=0)
 
-    draw_title_card_background(c, x, y)
+    draw_title_card_background(c, x, y, content)
     c.restoreState()
 
     draw_crop_marks(c, x - BLEED, y - BLEED, CARD_WIDTH_BLEED, CARD_HEIGHT_BLEED)
 
 
-def draw_title_card_back(c, x, y):
+def draw_title_card_back(c, x, y, content):
     """
     Draw the back of the title card with game description and QR code.
 
@@ -612,14 +794,14 @@ def draw_title_card_back(c, x, y):
     # Title
     c.setFont(Fonts.title, 11)
     c.setFillColor(Colors.text)
-    c.drawCentredString(x + CARD_WIDTH/2, y + CARD_HEIGHT - 12*mm, "Über das Spiel")
+    c.drawCentredString(x + CARD_WIDTH/2, y + CARD_HEIGHT - 12*mm, content["ABOUT_TITLE"])
 
     # Game description
     c.setFont(Fonts.body, 6)
     c.setFillColor(Colors.text)
 
     text_y = y + CARD_HEIGHT - 20*mm
-    for line in GAME_DESCRIPTION:
+    for line in content["GAME_DESCRIPTION"]:
         if line == "":
             text_y -= 2*mm
         else:
@@ -628,7 +810,7 @@ def draw_title_card_back(c, x, y):
 
     # QR Code
     qr_size = 18 * mm
-    qr_code = qr.QrCodeWidget(GITHUB_URL)
+    qr_code = qr.QrCodeWidget(content["GITHUB_URL"])
     qr_code.barLevel = 'M'
     qr_code.barWidth = qr_size
     qr_code.barHeight = qr_size
@@ -647,14 +829,14 @@ def draw_title_card_back(c, x, y):
     c.drawCentredString(x + CARD_WIDTH/2, y + 8*mm, "github.com/hazelwalker/kabul-instructions")
 
 
-def draw_title_card_back_with_marks(c, x, y):
+def draw_title_card_back_with_marks(c, x, y, content):
     """Draw title card back with clipping and crop marks."""
     c.saveState()
     clip_path = c.beginPath()
     clip_path.rect(x - BLEED, y - BLEED, CARD_WIDTH_BLEED, CARD_HEIGHT_BLEED)
     c.clipPath(clip_path, stroke=0, fill=0)
 
-    draw_title_card_back(c, x, y)
+    draw_title_card_back(c, x, y, content)
     c.restoreState()
 
     draw_crop_marks(c, x - BLEED, y - BLEED, CARD_WIDTH_BLEED, CARD_HEIGHT_BLEED)
@@ -801,14 +983,14 @@ def draw_card_front(c, x, y, card_data, number):
     draw_crop_marks(c, x - BLEED, y - BLEED, CARD_WIDTH_BLEED, CARD_HEIGHT_BLEED)
 
 
-def draw_card_back(c, x, y):
+def draw_card_back(c, x, y, content):
     """Draw a decorative back side card (4-card edition)."""
     c.saveState()
     clip_path = c.beginPath()
     clip_path.rect(x - BLEED, y - BLEED, CARD_WIDTH_BLEED, CARD_HEIGHT_BLEED)
     c.clipPath(clip_path, stroke=0, fill=0)
 
-    draw_back_background(c, x, y)
+    draw_back_background(c, x, y, content)
     c.restoreState()
 
     draw_crop_marks(c, x - BLEED, y - BLEED, CARD_WIDTH_BLEED, CARD_HEIGHT_BLEED)
@@ -887,31 +1069,40 @@ def generate_4card_edition(output_path):
     Page 1: Front sides (Cards 1-4)
     Page 2: Back sides (mirrored for duplex)
     """
+    content = get_content()
     c = canvas.Canvas(output_path, pagesize=A4)
     front_pos, back_pos = calculate_4card_positions()
 
     cards = [
-        (CARD_1, "1/4"),
-        (CARD_2, "2/4"),
-        (CARD_3, "3/4"),
-        (CARD_4, "4/4"),
+        (content["CARD_1"], "1/4"),
+        (content["CARD_2"], "2/4"),
+        (content["CARD_3"], "3/4"),
+        (content["CARD_4"], "4/4"),
     ]
 
     # Page 1: Front sides
     for i, (card_data, number) in enumerate(cards):
         draw_card_front(c, front_pos[i][0], front_pos[i][1], card_data, number)
 
-    draw_page_info(c, 1, 2, "Vorderseiten", "Regelkarten")
+    page_info = content["PAGE_INFO"]
+    c.setFont(Fonts.body, 7)
+    c.setFillColor(HexColor("#999999"))
+    info = f"KABUL {page_info['4card_edition']} | Page 1/2 | {page_info['4card_front']} | 63×88mm"
+    c.drawString(15*mm, 10*mm, info)
     c.showPage()
 
     # Page 2: Back sides (decorative)
     for i in range(4):
-        draw_card_back(c, back_pos[i][0], back_pos[i][1])
+        draw_card_back(c, back_pos[i][0], back_pos[i][1], content)
 
-    draw_page_info(c, 2, 2, "Rückseiten", "Regelkarten")
+    c.setFont(Fonts.body, 7)
+    c.setFillColor(HexColor("#999999"))
+    info = f"KABUL {page_info['4card_edition']} | Page 2/2 | {page_info['4card_back']} | 63×88mm"
+    c.drawString(15*mm, 10*mm, info)
+    c.drawRightString(PAGE_WIDTH - 15*mm, 10*mm, page_info['duplex_hint'])
     c.save()
 
-    print(f"✓ 4-Card Edition: {output_path}")
+    print(f"✓ 4-Card Edition ({LANGUAGE.upper()}): {output_path}")
 
 
 # =============================================================================
@@ -928,24 +1119,33 @@ def generate_2card_edition(output_path):
     Page 1: Front sides
     Page 2: Back sides (mirrored for duplex)
     """
+    content = get_content()
     c = canvas.Canvas(output_path, pagesize=A4)
     front_pos, back_pos = calculate_2card_positions()
 
     # Page 1: Front sides
-    draw_card_front(c, front_pos[0][0], front_pos[0][1], CARD_1, "1a")
-    draw_card_front(c, front_pos[1][0], front_pos[1][1], CARD_3, "2a")
+    draw_card_front(c, front_pos[0][0], front_pos[0][1], content["CARD_1"], "1a")
+    draw_card_front(c, front_pos[1][0], front_pos[1][1], content["CARD_3"], "2a")
 
-    draw_page_info(c, 1, 2, "Vorderseiten: Kartenwerte | Detailregeln", "Kompakt")
+    page_info = content["PAGE_INFO"]
+    c.setFont(Fonts.body, 7)
+    c.setFillColor(HexColor("#999999"))
+    info = f"KABUL {page_info['2card_edition']} | Page 1/2 | {page_info['2card_front']} | 63×88mm"
+    c.drawString(15*mm, 10*mm, info)
     c.showPage()
 
     # Page 2: Back sides (mirrored)
-    draw_card_front(c, back_pos[0][0], back_pos[0][1], CARD_2, "1b")
-    draw_card_front(c, back_pos[1][0], back_pos[1][1], CARD_4, "2b")
+    draw_card_front(c, back_pos[0][0], back_pos[0][1], content["CARD_2"], "1b")
+    draw_card_front(c, back_pos[1][0], back_pos[1][1], content["CARD_4"], "2b")
 
-    draw_page_info(c, 2, 2, "Rückseiten: Spielablauf | Strafen", "Kompakt")
+    c.setFont(Fonts.body, 7)
+    c.setFillColor(HexColor("#999999"))
+    info = f"KABUL {page_info['2card_edition']} | Page 2/2 | {page_info['2card_back']} | 63×88mm"
+    c.drawString(15*mm, 10*mm, info)
+    c.drawRightString(PAGE_WIDTH - 15*mm, 10*mm, page_info['duplex_hint'])
     c.save()
 
-    print(f"✓ 2-Card Edition: {output_path}")
+    print(f"✓ 2-Card Edition ({LANGUAGE.upper()}): {output_path}")
 
 
 # =============================================================================
@@ -961,32 +1161,34 @@ def generate_title_card(output_path):
 
     Optimized for duplex printing (long-edge flip).
     """
+    content = get_content()
     c = canvas.Canvas(output_path, pagesize=A4)
 
     # Center single card on page
     x = (PAGE_WIDTH - CARD_WIDTH) / 2
     y = (PAGE_HEIGHT - CARD_HEIGHT) / 2
 
+    page_info = content["PAGE_INFO"]
+
     # Page 1: Front (title)
-    draw_title_card(c, x, y)
+    draw_title_card(c, x, y, content)
 
     c.setFont(Fonts.body, 7)
     c.setFillColor(HexColor("#999999"))
-    c.drawString(15*mm, 10*mm, "KABUL Titelkarte | Seite 1/2 | Vorderseite | 63×88mm")
+    c.drawString(15*mm, 10*mm, f"KABUL Title Card | Page 1/2 | {page_info['title_front']} | 63×88mm")
     c.showPage()
 
     # Page 2: Back (description + QR)
-    # Same position (single card centered)
-    draw_title_card_back_with_marks(c, x, y)
+    draw_title_card_back_with_marks(c, x, y, content)
 
     c.setFont(Fonts.body, 7)
     c.setFillColor(HexColor("#999999"))
-    c.drawString(15*mm, 10*mm, "KABUL Titelkarte | Seite 2/2 | Rückseite | 63×88mm")
-    c.drawRightString(PAGE_WIDTH - 15*mm, 10*mm, "↻ Duplex: Lange Kante spiegeln")
+    c.drawString(15*mm, 10*mm, f"KABUL Title Card | Page 2/2 | {page_info['title_back']} | 63×88mm")
+    c.drawRightString(PAGE_WIDTH - 15*mm, 10*mm, page_info['duplex_hint'])
 
     c.save()
 
-    print(f"✓ Title Card: {output_path}")
+    print(f"✓ Title Card ({LANGUAGE.upper()}): {output_path}")
 
 
 # =============================================================================
@@ -996,22 +1198,29 @@ def generate_title_card(output_path):
 def main():
     """Generate all KABUL card editions."""
     print("=" * 50)
-    print("KABUL Card Generator")
+    print(f"KABUL Card Generator (Language: {LANGUAGE.upper()})")
     print("=" * 50)
 
     register_fonts()
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    # Generate all editions
-    generate_4card_edition(f"{OUTPUT_DIR}/kabul_cards_4card_edition.pdf")
-    generate_2card_edition(f"{OUTPUT_DIR}/kabul_cards_2card_edition.pdf")
-    generate_title_card(f"{OUTPUT_DIR}/kabul_cards_title.pdf")
+    # Generate all editions with language suffix
+    lang_suffix = f"_{LANGUAGE}"
+    generate_4card_edition(f"{OUTPUT_DIR}/kabul_cards_4card{lang_suffix}.pdf")
+    generate_2card_edition(f"{OUTPUT_DIR}/kabul_cards_2card{lang_suffix}.pdf")
+    generate_title_card(f"{OUTPUT_DIR}/kabul_cards_title{lang_suffix}.pdf")
 
     print()
-    print("Print settings:")
-    print("  • Duplex: Lange Kante spiegeln")
-    print("  • Scale: 100% (nicht skalieren)")
-    print("  • Entlang Schnittmarken schneiden")
+    if LANGUAGE == "de":
+        print("Druckeinstellungen:")
+        print("  • Duplex: Lange Kante spiegeln")
+        print("  • Skalierung: 100% (nicht skalieren)")
+        print("  • Entlang Schnittmarken schneiden")
+    else:
+        print("Print settings:")
+        print("  • Duplex: Long edge flip")
+        print("  • Scale: 100% (do not fit to page)")
+        print("  • Cut along crop marks")
     print()
     print(f"Output: {OUTPUT_DIR}/")
 
