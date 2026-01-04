@@ -26,6 +26,9 @@ from reportlab.lib.colors import HexColor
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.graphics.barcode import qr
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics import renderPDF
 import os
 import sys
 
@@ -239,8 +242,8 @@ CARD_4 = {
         {
             "heading": "Kabul-Strafe",
             "content": [
-                "Nicht niedrigste Anzahl oder >4 Punkte?",
-                "→ Punktezahl verdoppelt",
+                "Nicht niedrigste oder >4 Punkte?",
+                "→ Kartenzahl verdoppelt",
                 "oder",
                 "→ Nächste Runde: 5 Karten"
             ]
@@ -256,7 +259,7 @@ CARD_4 = {
         },
         {
             "heading": "Gleichstand",
-            "content": ["Der, der Kabul gerufen hat gewinnt"]
+            "content": ["Der der Kabul gerufen hat gewinnt"]
         }
     ]
 }
@@ -264,6 +267,24 @@ CARD_4 = {
 # Back side text (4-card edition only)
 BACK_TITLE = "KABUL"
 BACK_SUBTITLE = "Kartenspiel"
+
+# Title card text
+TITLE_CARD_TITLE = "KABUL"
+TITLE_CARD_SUBTITLE = "Spielregeln"
+
+# Title card back side content
+GITHUB_URL = "https://github.com/hazelwalker/kabul-instructions"
+GAME_DESCRIPTION = [
+    "KABUL ist ein schnelles Kartenspiel für 2-6 Spieler,",
+    "inspiriert von Cabo, Skyjo oder Golf. Ziel ist es, die",
+    "niedrigste Punktzahl zu erreichen – aber Vorsicht:",
+    "Du kennst nicht alle deine Karten!",
+    "",
+    "Merke dir deine Karten, tausche clever und rufe",
+    "»Kabul!«, wenn du glaubst zu gewinnen.",
+    "",
+    "Spieldauer: ca. 15–20 Minuten",
+]
 
 
 # =============================================================================
@@ -497,6 +518,146 @@ def draw_back_background(c, x, y):
 
     c.setFont(Fonts.body, 8)
     c.drawCentredString(x + CARD_WIDTH/2, y + CARD_HEIGHT/2 - 5*mm, BACK_SUBTITLE)
+
+
+def draw_title_card_background(c, x, y):
+    """
+    Draw the title card (same design as back, but with "Spielregeln" subtitle).
+
+    This card can be used as a cover card for the rule set.
+    """
+    draw_x = x - BLEED
+    draw_y = y - BLEED
+    draw_width = CARD_WIDTH + 2 * BLEED
+    draw_height = CARD_HEIGHT + 2 * BLEED
+
+    # Base color
+    c.setFillColor(Colors.back_base)
+    c.rect(draw_x, draw_y, draw_width, draw_height, fill=1, stroke=0)
+
+    # Wave 1 (darker)
+    c.saveState()
+    path = c.beginPath()
+    path.moveTo(draw_x, y + 30*mm)
+    path.curveTo(x + 20*mm, y + 40*mm, x + 40*mm, y + 55*mm, draw_x + draw_width, y + 65*mm)
+    path.lineTo(draw_x + draw_width, draw_y)
+    path.lineTo(draw_x, draw_y)
+    path.close()
+    c.setFillColor(Colors.back_wave1)
+    c.drawPath(path, fill=1, stroke=0)
+    c.restoreState()
+
+    # Wave 2 (darkest)
+    c.saveState()
+    path2 = c.beginPath()
+    path2.moveTo(draw_x, y + 18*mm)
+    path2.curveTo(x + 25*mm, y + 25*mm, x + 45*mm, y + 38*mm, draw_x + draw_width, y + 48*mm)
+    path2.lineTo(draw_x + draw_width, draw_y)
+    path2.lineTo(draw_x, draw_y)
+    path2.close()
+    c.setFillColor(Colors.back_wave2)
+    c.drawPath(path2, fill=1, stroke=0)
+    c.restoreState()
+
+    # Accent circle
+    c.saveState()
+    c.setFillColor(Colors.back_circle)
+    c.circle(x + 50*mm, y + 22*mm, 10*mm, fill=1, stroke=0)
+    c.restoreState()
+
+    # KABUL title (larger)
+    c.setFillColor(Colors.bg)
+    c.setFont(Fonts.title, 20)
+    c.drawCentredString(x + CARD_WIDTH/2, y + CARD_HEIGHT/2 + 8*mm, TITLE_CARD_TITLE)
+
+    # "Spielregeln" subtitle
+    c.setFont(Fonts.body, 9)
+    c.drawCentredString(x + CARD_WIDTH/2, y + CARD_HEIGHT/2 - 4*mm, TITLE_CARD_SUBTITLE)
+
+
+def draw_title_card(c, x, y):
+    """Draw the title card with clipping and crop marks."""
+    c.saveState()
+    clip_path = c.beginPath()
+    clip_path.rect(x - BLEED, y - BLEED, CARD_WIDTH_BLEED, CARD_HEIGHT_BLEED)
+    c.clipPath(clip_path, stroke=0, fill=0)
+
+    draw_title_card_background(c, x, y)
+    c.restoreState()
+
+    draw_crop_marks(c, x - BLEED, y - BLEED, CARD_WIDTH_BLEED, CARD_HEIGHT_BLEED)
+
+
+def draw_title_card_back(c, x, y):
+    """
+    Draw the back of the title card with game description and QR code.
+
+    Contains:
+    - Short game description
+    - QR code linking to GitHub repository
+    """
+    draw_x = x - BLEED
+    draw_y = y - BLEED
+    draw_width = CARD_WIDTH + 2 * BLEED
+    draw_height = CARD_HEIGHT + 2 * BLEED
+
+    # White background
+    c.setFillColor(Colors.bg)
+    c.rect(draw_x, draw_y, draw_width, draw_height, fill=1, stroke=0)
+
+    # Red accent bar at top (matching front design)
+    c.setFillColor(Colors.accent)
+    c.rect(draw_x, y + CARD_HEIGHT - 3.5*mm, draw_width, 3.5*mm + BLEED, fill=1, stroke=0)
+
+    # Title
+    c.setFont(Fonts.title, 11)
+    c.setFillColor(Colors.text)
+    c.drawCentredString(x + CARD_WIDTH/2, y + CARD_HEIGHT - 12*mm, "Über das Spiel")
+
+    # Game description
+    c.setFont(Fonts.body, 6)
+    c.setFillColor(Colors.text)
+
+    text_y = y + CARD_HEIGHT - 20*mm
+    for line in GAME_DESCRIPTION:
+        if line == "":
+            text_y -= 2*mm
+        else:
+            c.drawCentredString(x + CARD_WIDTH/2, text_y, line)
+            text_y -= 3.2*mm
+
+    # QR Code
+    qr_size = 18 * mm
+    qr_code = qr.QrCodeWidget(GITHUB_URL)
+    qr_code.barLevel = 'M'
+    qr_code.barWidth = qr_size
+    qr_code.barHeight = qr_size
+
+    # Create drawing and render QR code
+    d = Drawing(qr_size, qr_size)
+    d.add(qr_code)
+
+    qr_x = x + (CARD_WIDTH - qr_size) / 2
+    qr_y = y + 12*mm
+    renderPDF.draw(d, c, qr_x, qr_y)
+
+    # URL label below QR code
+    c.setFont(Fonts.body, 4.5)
+    c.setFillColor(Colors.heading)
+    c.drawCentredString(x + CARD_WIDTH/2, y + 8*mm, "github.com/hazelwalker/kabul-instructions")
+
+
+def draw_title_card_back_with_marks(c, x, y):
+    """Draw title card back with clipping and crop marks."""
+    c.saveState()
+    clip_path = c.beginPath()
+    clip_path.rect(x - BLEED, y - BLEED, CARD_WIDTH_BLEED, CARD_HEIGHT_BLEED)
+    c.clipPath(clip_path, stroke=0, fill=0)
+
+    draw_title_card_back(c, x, y)
+    c.restoreState()
+
+    draw_crop_marks(c, x - BLEED, y - BLEED, CARD_WIDTH_BLEED, CARD_HEIGHT_BLEED)
 
 
 # =============================================================================
@@ -788,11 +949,52 @@ def generate_2card_edition(output_path):
 
 
 # =============================================================================
+# PDF GENERATION - Title Card
+# =============================================================================
+
+def generate_title_card(output_path):
+    """
+    Generate title card PDF with front and back side.
+
+    Front: Red design with "KABUL - Spielregeln"
+    Back: Game description + QR code to GitHub repo
+
+    Optimized for duplex printing (long-edge flip).
+    """
+    c = canvas.Canvas(output_path, pagesize=A4)
+
+    # Center single card on page
+    x = (PAGE_WIDTH - CARD_WIDTH) / 2
+    y = (PAGE_HEIGHT - CARD_HEIGHT) / 2
+
+    # Page 1: Front (title)
+    draw_title_card(c, x, y)
+
+    c.setFont(Fonts.body, 7)
+    c.setFillColor(HexColor("#999999"))
+    c.drawString(15*mm, 10*mm, "KABUL Titelkarte | Seite 1/2 | Vorderseite | 63×88mm")
+    c.showPage()
+
+    # Page 2: Back (description + QR)
+    # Same position (single card centered)
+    draw_title_card_back_with_marks(c, x, y)
+
+    c.setFont(Fonts.body, 7)
+    c.setFillColor(HexColor("#999999"))
+    c.drawString(15*mm, 10*mm, "KABUL Titelkarte | Seite 2/2 | Rückseite | 63×88mm")
+    c.drawRightString(PAGE_WIDTH - 15*mm, 10*mm, "↻ Duplex: Lange Kante spiegeln")
+
+    c.save()
+
+    print(f"✓ Title Card: {output_path}")
+
+
+# =============================================================================
 # MAIN
 # =============================================================================
 
 def main():
-    """Generate both KABUL card editions."""
+    """Generate all KABUL card editions."""
     print("=" * 50)
     print("KABUL Card Generator")
     print("=" * 50)
@@ -800,9 +1002,10 @@ def main():
     register_fonts()
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    # Generate both editions
+    # Generate all editions
     generate_4card_edition(f"{OUTPUT_DIR}/kabul_cards_4card_edition.pdf")
     generate_2card_edition(f"{OUTPUT_DIR}/kabul_cards_2card_edition.pdf")
+    generate_title_card(f"{OUTPUT_DIR}/kabul_cards_title.pdf")
 
     print()
     print("Print settings:")
